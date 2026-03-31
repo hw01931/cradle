@@ -1,7 +1,7 @@
 import logging
 import sys
 from fastapi import FastAPI
-from src.cradle import CradleMiddleware
+from cradle import CradleMiddleware
 
 # Configure logging to see Cradle's output
 logging.basicConfig(
@@ -22,6 +22,15 @@ def read_root():
 @app.get("/error")
 def trigger_error():
     raise ValueError("앗! 예기치 못한 비즈니스 로직 에러가 발생했습니다.")
+
+@app.get("/cradle/approve/{action_id}")
+async def approve_action(action_id: str):
+    from cradle.action import action_manager
+    result = await action_manager.approve(action_id)
+    return {
+        "msg": f"Action {action_id} processed",
+        "result": result
+    }
 
 if __name__ == "__main__":
     import uvicorn

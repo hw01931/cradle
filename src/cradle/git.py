@@ -12,7 +12,9 @@ class GitManager:
 
     def _run_git(self, args: List[str]) -> str:
         cmd = ["git"] + args
-        if self.dry_run and any(x in args for x in ["push", "commit", "branch"]):
+        #Interception of modifying commands for dry_run
+        modifying_commands = ["checkout", "branch", "commit", "push", "add", "reset", "rebase", "merge"]
+        if self.dry_run and any(cmd_arg in modifying_commands for cmd_arg in args):
             logger.info(f"🌵 [Dry Run] Would execute: {' '.join(cmd)}")
             return "Dry run successful"
         

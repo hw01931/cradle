@@ -17,6 +17,24 @@ class CradleConfig:
             "provider": "openai",
             "model": "gpt-4-turbo",
             "api_key": None,
+            "db": {
+                "url": "sqlite+aiosqlite:///./cradle.db",
+                "pool_size": 5,
+            },
+            "action": {
+                "allowed_actions": ["restart", "scale_up", "cleanup_logs"],
+                "require_approval": ["restart", "scale_up"],
+                "auto_recover": False,
+                "dry_run": True,
+            },
+            "metrics": {
+                "cpu_threshold": 80.0,
+                "mem_threshold": 80.0,
+                "interval": 60,
+            },
+            "alerts": {
+                "slack_webhook": None,
+            },
             "diet": {
                 "max_stack_depth": 10,
             },

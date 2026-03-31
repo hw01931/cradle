@@ -18,36 +18,44 @@ class OpenAIEngine(BaseEngine):
     def __init__(self, api_key: str, model: str = "gpt-4-turbo-preview"):
         self.api_key = api_key
         self.model = model
-        self.api_url = "https://api.openai.com/v1/chat/completions"
 
-    async def diagnose(self, diet_json: str) -> Dict[str, Any]:
+    async def diagnose(self, report_json: str) -> Dict[str, Any]:
         if not self.api_key:
-            logger.warning("No API Key provided. Mocking diagnosis.")
-            return {
-                "cause": "Unknown (No API Key)",
-                "fix": "Please set CRADLE_API_KEY",
-                "confidence": 0.0
-            }
+            logger.warning("No OpenAI API Key. Mocking results.")
+            return self._mock_diagnosis(report_json)
+        
+        logger.info(f"🌌 [Cradle] Calling OpenAI ({self.model})...")
+        # Placeholder for real API call
+        return {"cause": "Identified by OpenAI", "recommended_action": "restart"}
 
-        # prompt = f"You are an SRE agent 'Project Cradle'. Analyze this error and suggest a fix:\n{diet_json}"
-        # ... 실구현은 Milestone 4 이후에 더 구체화 가능 ...
-        
-        logger.info(f"🌌 [Cradle Engine] Sending request to {self.model}...")
-        
-        # 실제 호출부 (Stub)
+    def _mock_diagnosis(self, report_json: str) -> Dict[str, Any]:
+        data = json.loads(report_json)
+        err = data.get("error", {}).get("type", "")
         return {
-            "cause": "Demo Cause",
-            "fix": "Demo Fix",
-            "confidence": 0.8
+            "cause": f"Mock cause for {err}",
+            "recommended_action": "restart" if "Value" in err else None
         }
 
-def get_engine(config: Any) -> BaseEngine:
-    provider = config.get("provider")
-    api_key = config.get("api_key")
-    model = config.get("model")
+class AnthropicEngine(BaseEngine):
+    def __init__(self, api_key: str, model: str = "claude-3-opus-20240229"):
+        self.api_key = api_key
+        self.model = model
 
-    if provider == "openai":
-        return OpenAIEngine(api_key=api_key, model=model)
+    async def diagnose(self, report_json: str) -> Dict[str, Any]:
+        if not self.api_key:
+            logger.warning("No Anthropic API Key. Mocking results.")
+            return {"cause": "Mock Anthropic", "recommended_action": "scale_up"}
+        
+        logger.info(f"🌌 [Cradle] Calling Anthropic ({self.model})...")
+        return {"cause": "Identified by Anthropic", "recommended_action": "scale_up"}
+
+def get_engine(config_obj: Any) -> BaseEngine:
+    provider = config_obj.get("provider", "openai").lower()
+    api_key = config_obj.get("api_key")
+    model = config_obj.get("model")
+
+    if provider == "anthropic":
+        return AnthropicEngine(api_key=api_key, model=model or "claude-3-sonnet-20240229")
     
-    # 기본값으로 OpenAI 리턴 또는 다른 엔진 추가 가능
-    return OpenAIEngine(api_key=api_key, model=model)
+    # Default to OpenAI
+    return OpenAIEngine(api_key=api_key, model=model or "gpt-4-turbo-preview")

@@ -63,3 +63,25 @@ def get_diet_traceback(exc: Exception, max_stack_depth: int = 10) -> str:
 
     # 토큰 절약을 위해 separators=(',', ':') 사용 가능하나, 로그 가독성을 위해 현재는 유지
     return json.dumps(diet_info, indent=2, ensure_ascii=False)
+
+def get_diet_data(data: Any, max_str_len: int = 100) -> Any:
+    """
+    일반 데이터 구조에서 민감한 정보를 마스킹하고 긴 문자열을 축소합니다.
+    """
+    mask_keys = {"password", "secret", "token", "key", "auth", "pwd", "ssn"}
+    
+    if isinstance(data, dict):
+        new_dict = {}
+        for k, v in data.items():
+            if k.lower() in mask_keys or any(mk in k.lower() for mk in mask_keys):
+                new_dict[k] = "********"
+            else:
+                new_dict[k] = get_diet_data(v, max_str_len)
+        return new_dict
+    elif isinstance(data, list):
+        return [get_diet_data(item, max_str_len) for item in data]
+    elif isinstance(data, str):
+        if len(data) > max_str_len:
+            return data[:max_str_len // 2] + "..." + data[-max_str_len // 2:]
+        return data
+    return data

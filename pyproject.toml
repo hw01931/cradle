@@ -5,18 +5,33 @@ build-backend = "hatchling.build"
 [project]
 name = "cradle"
 version = "0.1.0"
-description = "Project Cradle: Autonomous SRE Agent"
+description = "Project Cradle: The Unified Foundation for Autonomous Reliability (A Cradle for Harnesses)"
+authors = [
+    { name = "Project Cradle Team", email = "cradle@example.com" }
+]
+readme = "README.md"
+urls = { Repository = "https://github.com/example/cradle" }
+keywords = ["sre", "ai-agent", "autonomous", "devops", "monitoring"]
 dependencies = [
     "fastapi",
     "uvicorn",
     "httpx",
     "PyYAML",
+    "sqlalchemy",
+    "aiosqlite",
+    "psutil",
 ]
+
+[project.scripts]
+cradle = "cradle.cli:main"
 
 [project.optional-dependencies]
 test = [
     "pytest",
     "pytest-asyncio",
+]
+gpu = [
+    "pynvml",
 ]
 
 [tool.hatch.build.targets.wheel]
